@@ -1,4 +1,4 @@
-package com.weatherObserver;
+package com.weatherObserver.config;
 
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;

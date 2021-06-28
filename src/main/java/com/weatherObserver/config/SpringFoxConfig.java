@@ -1,4 +1,4 @@
-package com.weatherObserver;
+package com.weatherObserver.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
