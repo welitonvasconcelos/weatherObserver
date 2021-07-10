@@ -6,7 +6,7 @@ plugins {
 }
 
 group = 'com.weatherObserver'
-version = '0.0.2-SNAPSHOT'
+version = '0.0.3-SNAPSHOT'
 sourceCompatibility = '1.8'
 
 repositories {
@@ -19,6 +19,7 @@ dependencies {
 	
 	implementation group: 'io.springfox', name: 'springfox-swagger-ui', version: '2.9.2'
 	implementation group: 'io.springfox', name: 'springfox-swagger2', version: '2.9.2'
+	implementation 'org.modelmapper:modelmapper:2.3.3'
 	
 	compileOnly 'org.projectlombok:lombok:1.18.20'
 	annotationProcessor 'org.projectlombok:lombok:1.18.20'

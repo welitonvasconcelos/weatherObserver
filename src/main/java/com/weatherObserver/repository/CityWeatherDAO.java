@@ -2,9 +2,10 @@ package com.weatherObserver.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import com.weatherObserver.entity.User;
+
+import com.weatherObserver.entity.CityWeather;
 
 @Repository
-public interface UserDAO extends JpaRepository<User, Long>{
-	public User findByEmail(String email);
+public interface CityWeatherDAO extends JpaRepository<CityWeather, Long>{
+	public CityWeather findByName(String name);
 }

@@ -10,11 +10,18 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.Singular;
 
 @Entity
 @Data
 @Table(name = "user")
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class User implements Serializable {
 
 	private static final long serialVersionUID = 1L;
@@ -22,7 +29,9 @@ public class User implements Serializable {
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
 	private String email;
+	
+	@Singular
 	@OneToMany
-	private List<AvailableTimeToCity> availableTimeToCity;
+	private List<AvailableTimeToCity> availableTimeToCities;
 
 }
