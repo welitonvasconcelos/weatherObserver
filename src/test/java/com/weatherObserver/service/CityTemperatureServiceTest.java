@@ -41,17 +41,25 @@ public class CityTemperatureServiceTest {
 	@Captor
 	private ArgumentCaptor<CityWeather> captor;
 
+	private String email;
+
+	private String cityKey;
+
+	private String cityName;
+
+	private WeatherCondition weatherCondition;
+
 	@BeforeEach
 	public void beforeEach() {
 		this.cityTemperatureService = new CityTemperatureService(userDAO, cityWeatherDAO, accuweatherService);
+		email = "user@user.com";
+		cityKey = "1234";
+		cityName = "City";
+		weatherCondition = createWeatherCondition(cityKey);
 	}
 
 	@Test
 	public void verifyAddInRepository() {
-		String email = "user@user.com";
-		String cityKey = "1234";
-		String cityName = "City";
-		WeatherCondition weatherCondition = createWeatherCondition(cityKey);
 		Mockito.when(userDAO.findByEmail(email)).thenReturn(null);
 		Mockito.when(cityWeatherDAO.findByName(cityName)).thenReturn(null);
 		Mockito.when(accuweatherService.fetchCityKey(cityName)).thenReturn(cityKey);
@@ -71,9 +79,6 @@ public class CityTemperatureServiceTest {
 
 	@Test
 	public void wheaterConditionsIsNotFound() {
-		String email = "user@user.com";
-		String cityKey = "1234";
-		String cityName = "City";
 		Mockito.when(userDAO.findByEmail(email)).thenReturn(null);
 		Mockito.when(cityWeatherDAO.findByName(cityName)).thenReturn(null);
 		Mockito.when(accuweatherService.fetchCityKey(cityName)).thenReturn(cityKey);
@@ -85,20 +90,18 @@ public class CityTemperatureServiceTest {
 
 	@Test
 	public void keyCityIsNotFound() {
-		String email = "user@user.com";
-		String cityName = "City";
+		LocalDateTime now = LocalDateTime.now();
 		Mockito.when(userDAO.findByEmail(email)).thenReturn(null);
 		Mockito.when(cityWeatherDAO.findByName(cityName)).thenReturn(null);
 		Mockito.when(accuweatherService.fetchCityKey(cityName)).thenReturn(null);
 		AvailableTimeToCity availableTimeToCity = AvailableTimeToCity.builder().cityName(cityName)
-				.start(LocalDateTime.now()).end(LocalDateTime.now().plusDays(7)).build();
+				.start(now).end(now.plusDays(7)).build();
 		assertThrows(NoSuchElementException.class, () -> cityTemperatureService.addCity(email, availableTimeToCity));
 	}
 
 	private WeatherCondition createWeatherCondition(String cityKey) {
 		Metric metric = Metric.builder().value(28.0).unit("C").build();
 		Temperature temperature = Temperature.builder().metric(metric).build();
-
 		return WeatherCondition.builder().cityKey(cityKey).temperature(temperature)
 				.localObservationDateTime(LocalDateTime.now()).build();
 	}

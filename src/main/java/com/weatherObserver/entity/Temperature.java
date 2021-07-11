@@ -14,8 +14,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Data
 @Table(name = "temperature")
+@Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor

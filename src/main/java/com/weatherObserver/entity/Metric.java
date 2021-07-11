@@ -14,8 +14,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Data
 @Table(name = "metric")
+@Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
