@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.weatherObserver.entity.AvailableTimeToCity;
-import com.weatherObserver.model.dto.CityAndTimeDTO;
+import com.weatherObserver.model.dto.InputInserCityDTO;
 import com.weatherObserver.model.dto.CityDTO;
 import com.weatherObserver.service.CityTemperatureService;
 
@@ -41,8 +41,8 @@ public class CityTemperatureRestController {
 	@PostMapping
 	@ResponseBody
 	@ApiOperation("Method to add a city to user observation")
-	public ResponseEntity<?> addCitiy(@PathVariable("email") String email, @RequestBody CityAndTimeDTO city){
+	public ResponseEntity<?> addCitiy(@RequestBody InputInserCityDTO city){
 		AvailableTimeToCity availableTimeToCity = modelMapper.map(city, AvailableTimeToCity.class);
-		return  ResponseEntity.status(HttpStatus.CREATED).body(cityTemperatureService.addCity(email, availableTimeToCity));
+		return  ResponseEntity.status(HttpStatus.CREATED).body(cityTemperatureService.addCity(city.getEmail(), availableTimeToCity));
 	}
 }

@@ -1,6 +1,8 @@
 package com.weatherObserver.service;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThrows;
 
 import java.time.LocalDateTime;
 import java.util.NoSuchElementException;
@@ -15,11 +17,10 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.weatherObserver.entity.AvailableTimeToCity;
+import com.weatherObserver.entity.CityWeather;
+import com.weatherObserver.entity.Temperature;
 import com.weatherObserver.entity.User;
 import com.weatherObserver.entity.WeatherCondition;
-import com.weatherObserver.entity.CityWeather;
-import com.weatherObserver.entity.Metric;
-import com.weatherObserver.entity.Temperature;
 import com.weatherObserver.repository.CityWeatherDAO;
 import com.weatherObserver.repository.UserDAO;
 
@@ -100,8 +101,8 @@ public class CityTemperatureServiceTest {
 	}
 
 	private WeatherCondition createWeatherCondition(String cityKey) {
-		Metric metric = Metric.builder().value(28.0).unit("C").build();
-		Temperature temperature = Temperature.builder().metric(metric).build();
+		//Metric metric = Metric.builder().value(28.0).unit("C").build();
+		Temperature temperature = Temperature.builder().metricValue(28.0).metricUnit("C").build();
 		return WeatherCondition.builder().cityKey(cityKey).temperature(temperature)
 				.localObservationDateTime(LocalDateTime.now()).build();
 	}
