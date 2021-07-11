@@ -26,7 +26,7 @@ public class AccuweatherService {
 	@Autowired
 	private ModelMapper modelMapper;
 
-	@Value("weatherObserver.APIKEY")
+	@Value("${weatherObserver.APIKEY}")
 	private String apiKey;
 
 	public WeatherCondition fetchWeatherConditions(String cityKey) {
