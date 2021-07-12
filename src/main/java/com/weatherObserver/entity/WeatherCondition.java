@@ -28,7 +28,6 @@ public class WeatherCondition implements Serializable{
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
-	private String cityKey;
 	@OneToOne(cascade=CascadeType.PERSIST)
 	private Temperature temperature;
 	private LocalDateTime localObservationDateTime;

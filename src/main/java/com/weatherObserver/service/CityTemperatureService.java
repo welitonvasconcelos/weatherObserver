@@ -89,6 +89,8 @@ public class CityTemperatureService {
 			if(now.isBefore(end) && now.isAfter(start))
 				citiesToObserve.add(availableTimeToCity);
 		}
+		user.setAvailableTimeToCities(citiesToObserve);
+		userDAO.save(user);
 		return citiesToObserve;
 	}
 

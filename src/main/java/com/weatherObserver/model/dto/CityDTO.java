@@ -4,9 +4,12 @@ import java.util.List;
 
 import com.weatherObserver.entity.WeatherCondition;
 
+import lombok.Data;
+
+@Data
 public class CityDTO {
 
-	String name;
-	List<WeatherCondition> weatherConditions;
+	public String name;
+	public List<WeatherCondition> weatherConditions;
 
 }

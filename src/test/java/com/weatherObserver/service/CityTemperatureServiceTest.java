@@ -114,7 +114,7 @@ public class CityTemperatureServiceTest {
 	private WeatherCondition createWeatherCondition(String cityKey) {
 		// Metric metric = Metric.builder().value(28.0).unit("C").build();
 		Temperature temperature = Temperature.builder().metricValue(28.0).metricUnit("C").build();
-		return WeatherCondition.builder().cityKey(cityKey).temperature(temperature)
+		return WeatherCondition.builder().temperature(temperature)
 				.localObservationDateTime(LocalDateTime.now()).build();
 	}
 
