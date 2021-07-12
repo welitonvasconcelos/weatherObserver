@@ -17,9 +17,9 @@ import lombok.NoArgsConstructor;
 @Entity
 @Table(name = "availableTimeToCity")
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class AvailableTimeToCity implements Serializable {
 
 	private static final long serialVersionUID = 1L;

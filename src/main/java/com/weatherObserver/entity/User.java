@@ -31,8 +31,11 @@ public class User implements Serializable {
 	private Long id;
 	private String email;
 	
-	@Singular
 	@OneToMany(cascade=CascadeType.PERSIST)
 	private List<AvailableTimeToCity> availableTimeToCities;
 
+	public void addAvailableTimeToCity(AvailableTimeToCity availableTimeToCity) {
+		availableTimeToCities.add(availableTimeToCity);
+	}
+	
 }

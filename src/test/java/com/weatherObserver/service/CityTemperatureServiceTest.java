@@ -7,6 +7,8 @@ import static org.junit.Assert.assertThrows;
 import java.time.LocalDateTime;
 import java.util.NoSuchElementException;
 
+import javax.persistence.EntityManager;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,9 +23,10 @@ import com.weatherObserver.entity.CityWeather;
 import com.weatherObserver.entity.Temperature;
 import com.weatherObserver.entity.User;
 import com.weatherObserver.entity.WeatherCondition;
+import com.weatherObserver.repository.AvailableTimeToCityDAO;
 import com.weatherObserver.repository.CityWeatherDAO;
 import com.weatherObserver.repository.UserDAO;
-
+import com.weatherObserver.repository.WeatherConditionDAO;
 
 @ExtendWith(MockitoExtension.class)
 public class CityTemperatureServiceTest {
@@ -39,6 +42,12 @@ public class CityTemperatureServiceTest {
 	@Mock
 	private AccuweatherService accuweatherService;
 
+	@Mock
+	private AvailableTimeToCityDAO availableTimeToCityDAO;
+
+	@Mock
+	private WeatherConditionDAO weatherConditionDAO;
+
 	@Captor
 	private ArgumentCaptor<CityWeather> captor;
 
@@ -52,7 +61,8 @@ public class CityTemperatureServiceTest {
 
 	@BeforeEach
 	public void beforeEach() {
-		this.cityTemperatureService = new CityTemperatureService(userDAO, cityWeatherDAO, accuweatherService);
+		this.cityTemperatureService = new CityTemperatureService(userDAO, cityWeatherDAO, accuweatherService,
+				availableTimeToCityDAO, weatherConditionDAO);
 		email = "user@user.com";
 		cityKey = "1234";
 		cityName = "City";
@@ -61,6 +71,7 @@ public class CityTemperatureServiceTest {
 
 	@Test
 	public void verifyAddInRepository() {
+		// doNothing().when(e).persist(any(Operation.class));
 		Mockito.when(userDAO.findByEmail(email)).thenReturn(null);
 		Mockito.when(cityWeatherDAO.findByName(cityName)).thenReturn(null);
 		Mockito.when(accuweatherService.fetchCityKey(cityName)).thenReturn(cityKey);
@@ -95,13 +106,13 @@ public class CityTemperatureServiceTest {
 		Mockito.when(userDAO.findByEmail(email)).thenReturn(null);
 		Mockito.when(cityWeatherDAO.findByName(cityName)).thenReturn(null);
 		Mockito.when(accuweatherService.fetchCityKey(cityName)).thenReturn(null);
-		AvailableTimeToCity availableTimeToCity = AvailableTimeToCity.builder().cityName(cityName)
-				.start(now).end(now.plusDays(7)).build();
+		AvailableTimeToCity availableTimeToCity = AvailableTimeToCity.builder().cityName(cityName).start(now)
+				.end(now.plusDays(7)).build();
 		assertThrows(NoSuchElementException.class, () -> cityTemperatureService.addCity(email, availableTimeToCity));
 	}
 
 	private WeatherCondition createWeatherCondition(String cityKey) {
-		//Metric metric = Metric.builder().value(28.0).unit("C").build();
+		// Metric metric = Metric.builder().value(28.0).unit("C").build();
 		Temperature temperature = Temperature.builder().metricValue(28.0).metricUnit("C").build();
 		return WeatherCondition.builder().cityKey(cityKey).temperature(temperature)
 				.localObservationDateTime(LocalDateTime.now()).build();

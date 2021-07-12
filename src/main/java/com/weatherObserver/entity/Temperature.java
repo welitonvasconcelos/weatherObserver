@@ -2,12 +2,10 @@ package com.weatherObserver.entity;
 
 import java.io.Serializable;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 import lombok.AllArgsConstructor;
@@ -27,7 +25,6 @@ public class Temperature implements Serializable {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
-	//@OneToOne(cascade=CascadeType.PERSIST)
 	private double metricValue;
 	private String metricUnit;
 }
