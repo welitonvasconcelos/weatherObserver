@@ -28,8 +28,8 @@ public class CityTemperatureService {
 	private WeatherConditionDAO weatherConditionDAO;
 
 	@Autowired
-	public CityTemperatureService(UserDAO userDAO, CityWeatherDAO cityWeatherDAO,
-			AccuweatherService accuweatherService, AvailableTimeToCityDAO availableTimeToCityDAO, WeatherConditionDAO weatherConditionDAO) {
+	public CityTemperatureService(UserDAO userDAO, CityWeatherDAO cityWeatherDAO, AccuweatherService accuweatherService,
+			AvailableTimeToCityDAO availableTimeToCityDAO, WeatherConditionDAO weatherConditionDAO) {
 		this.userDAO = userDAO;
 		this.cityWeatherDAO = cityWeatherDAO;
 		this.accuweatherService = accuweatherService;
@@ -46,26 +46,27 @@ public class CityTemperatureService {
 		List<CityDTO> cityWeatherDTO = convertCityWeatherToDTO(cityWeather);
 		return cityWeatherDTO;
 	}
-	
+
 	private List<CityDTO> convertCityWeatherToDTO(List<CityWeather> cityWeather) {
-		 List<CityDTO> cityWeatherDTO = new ArrayList<>();
+		List<CityDTO> cityWeatherDTO = new ArrayList<>();
 		for (CityWeather cityWeather2 : cityWeather) {
-			if(cityWeather2.getWeatherConditions().isEmpty())
+			if (cityWeather2.getWeatherConditions().isEmpty())
 				continue;
 			CityDTO map = new CityDTO();
 			map.setName(cityWeather2.getName());
 			map.setWeatherConditions(cityWeather2.getWeatherConditions());
 			cityWeatherDTO.add(map);
 		}
-        return cityWeatherDTO;
-    }
+		return cityWeatherDTO;
+	}
 
-	private List<CityWeather>  searchAvailableCityWeather(List<AvailableTimeToCity> citiesToObserve) {
+	private List<CityWeather> searchAvailableCityWeather(List<AvailableTimeToCity> citiesToObserve) {
 		List<CityWeather> cityWeather = new ArrayList<>();
 		for (AvailableTimeToCity periodToCity : citiesToObserve) {
 			CityWeather city = cityWeatherDAO.findByName(periodToCity.getCityName());
-			List<WeatherCondition> weatherConditions = removeWeatherConditionsInDiffertenPeriod(city.getWeatherConditions(), periodToCity);
-			if(weatherConditions.isEmpty())
+			List<WeatherCondition> weatherConditions = removeWeatherConditionsInDiffertenPeriod(
+					city.getWeatherConditions(), periodToCity);
+			if (weatherConditions.isEmpty())
 				continue;
 			city.setWeatherConditions(weatherConditions);
 			cityWeather.add(city);
@@ -73,13 +74,14 @@ public class CityTemperatureService {
 		return cityWeather;
 	}
 
-	private List<WeatherCondition> removeWeatherConditionsInDiffertenPeriod(List<WeatherCondition> weatherConditions, AvailableTimeToCity periodToCity) {
-		LocalDateTime end = periodToCity .getEnd();
-		LocalDateTime start = periodToCity .getStart();
+	private List<WeatherCondition> removeWeatherConditionsInDiffertenPeriod(List<WeatherCondition> weatherConditions,
+			AvailableTimeToCity periodToCity) {
+		LocalDateTime end = periodToCity.getEnd();
+		LocalDateTime start = periodToCity.getStart();
 		List<WeatherCondition> weatherConditionsToReturn = new ArrayList<>();
 		for (WeatherCondition weatherCondition : weatherConditions) {
 			LocalDateTime localObservationDateTime = weatherCondition.getLocalObservationDateTime();
-			if(localObservationDateTime.isBefore(end) && localObservationDateTime.isAfter(start)) {
+			if (localObservationDateTime.isBefore(end) && localObservationDateTime.isAfter(start)) {
 				weatherConditionsToReturn.add(weatherCondition);
 			}
 		}
@@ -91,9 +93,9 @@ public class CityTemperatureService {
 		LocalDateTime now = LocalDateTime.now();
 		List<AvailableTimeToCity> currentTimeToCities = user.getAvailableTimeToCities();
 		for (AvailableTimeToCity availableTimeToCity : currentTimeToCities) {
-			LocalDateTime end = availableTimeToCity .getEnd();
-			LocalDateTime start = availableTimeToCity .getStart();
-			if(now.isBefore(end) && now.isAfter(start))
+			LocalDateTime end = availableTimeToCity.getEnd();
+			LocalDateTime start = availableTimeToCity.getStart();
+			if (now.isBefore(end) && now.isAfter(start))
 				citiesToObserve.add(availableTimeToCity);
 		}
 		user.setAvailableTimeToCities(citiesToObserve);
@@ -103,16 +105,13 @@ public class CityTemperatureService {
 
 	public User addCity(String email, AvailableTimeToCity availableTimeToCity) {
 		User user = searchUser(email, availableTimeToCity);
-		CityWeather city = searchCity(availableTimeToCity);
-		WeatherCondition weatherContidion = searchWeatherCondition(city);
-		city.addWeatherCondition(weatherContidion);
+		searchCityWeather(availableTimeToCity);
 		userDAO.save(user);
-		cityWeatherDAO.save(city);
 		return user;
 	}
 
-	private WeatherCondition searchWeatherCondition(CityWeather city) {
-		WeatherCondition weatherContidion = accuweatherService.fetchWeatherConditions(city.getKey());
+	private WeatherCondition searchWeatherCondition(String cityKey) {
+		WeatherCondition weatherContidion = accuweatherService.fetchWeatherConditions(cityKey);
 		if (weatherContidion == null)
 			throw new NoSuchElementException("Weather Condition not found");
 		weatherConditionDAO.save(weatherContidion);
@@ -126,7 +125,8 @@ public class CityTemperatureService {
 			String keyCity = accuweatherService.fetchCityKey(availableTimeToCity.getCityName());
 			if (keyCity == null)
 				throw new NoSuchElementException("City not found");
-			city = CityWeather.builder().key(keyCity).name(cityName).weatherConditions(new ArrayList<WeatherCondition>()).build();
+			city = CityWeather.builder().key(keyCity).name(cityName)
+					.weatherConditions(new ArrayList<WeatherCondition>()).build();
 		}
 		return city;
 	}
@@ -141,4 +141,27 @@ public class CityTemperatureService {
 		return user;
 	}
 
+	public String updateCityWeathers(String email) {
+		User user = userDAO.findByEmail(email);
+		if (user == null)
+			throw new NoSuchElementException("User not found");
+		List<AvailableTimeToCity> citiesAndPeriodToObserve = verifyCitiesInSlectedPeriod(user);
+		if (citiesAndPeriodToObserve.isEmpty())
+			return "No cities to update";
+		searchCityWeathers(citiesAndPeriodToObserve);
+		return "City weather conditions have been updated";
+	}
+
+	private void searchCityWeathers(List<AvailableTimeToCity> citiesToObserve) {
+		for (AvailableTimeToCity periodToCity : citiesToObserve) {
+			searchCityWeather(periodToCity);
+		}
+	}
+
+	private void searchCityWeather(AvailableTimeToCity periodToCity) {
+		CityWeather city = searchCity(periodToCity);
+		WeatherCondition weatherContidion = searchWeatherCondition(city.getKey());
+		city.addWeatherCondition(weatherContidion);
+		cityWeatherDAO.save(city);
+	}
 }

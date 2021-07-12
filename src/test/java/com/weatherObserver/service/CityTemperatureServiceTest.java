@@ -19,7 +19,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import com.weatherObserver.api.WeatherObserverApplication;
+import com.weatherObserver.WeatherObserverApplication;
 import com.weatherObserver.entity.AvailableTimeToCity;
 import com.weatherObserver.entity.CityWeather;
 import com.weatherObserver.entity.Temperature;
@@ -77,25 +77,30 @@ public class CityTemperatureServiceTest {
 		Mockito.when(userDAO.findByEmail(email)).thenReturn(null);
 		assertThrows(NoSuchElementException.class, () -> cityTemperatureService.listCities(email));
 	}
-//	@Test
-//	public void verifyNonSelectionWeatherConditions() {
-//		LocalDateTime now = LocalDateTime.now().minusDays(7);
-//		AvailableTimeToCity availableTimeToCity = AvailableTimeToCity.builder().id(1l).cityName(cityName)
-//				.start(LocalDateTime.now().minusHours(1l)).end(LocalDateTime.now().plusDays(7)).build();
-//		List<AvailableTimeToCity> availableTimeToCities = new ArrayList<AvailableTimeToCity>();
-//		availableTimeToCities.add(availableTimeToCity);
-//		User user1 = Mockito.mock(User.class);
-//		Mockito.when(user1.getAvailableTimeToCities()).thenReturn(availableTimeToCities);
-//		WeatherCondition weatherCondition = createWeatherCondition(cityKey, 28.0, "C", now);
-//		List<WeatherCondition> weatherConditions = new ArrayList<WeatherCondition>();
-//		weatherConditions.add(weatherCondition);
-//		Mockito.when(userDAO.findByEmail(email)).thenReturn(user1);
-//		CityWeather cityWeather = Mockito.mock(CityWeather.class);
-//		Mockito.when(cityWeather.getWeatherConditions()).thenReturn(weatherConditions);
-//		Mockito.when(cityWeatherDAO.findByName(cityName)).thenReturn(cityWeather);
-//		List<CityDTO> listCities = cityTemperatureService.listCities(email);
-//		assertTrue(listCities.isEmpty());
-//	}
+	@Test
+	public void userNotFoundToUpdateWeatherConditions() {
+		Mockito.when(userDAO.findByEmail(email)).thenReturn(null);
+		assertThrows(NoSuchElementException.class, () -> cityTemperatureService.updateCityWeathers(email));
+	}
+	@Test
+	public void verifyNonSelectionWeatherConditions() {
+		LocalDateTime now = LocalDateTime.now().minusDays(7);
+		AvailableTimeToCity availableTimeToCity = AvailableTimeToCity.builder().id(1l).cityName(cityName)
+				.start(LocalDateTime.now().minusHours(1l)).end(LocalDateTime.now().plusDays(7)).build();
+		List<AvailableTimeToCity> availableTimeToCities = new ArrayList<AvailableTimeToCity>();
+		availableTimeToCities.add(availableTimeToCity);
+		User user1 = Mockito.mock(User.class);
+		Mockito.when(user1.getAvailableTimeToCities()).thenReturn(availableTimeToCities);
+		WeatherCondition weatherCondition = createWeatherCondition(cityKey, 28.0, "C", now);
+		List<WeatherCondition> weatherConditions = new ArrayList<WeatherCondition>();
+		weatherConditions.add(weatherCondition);
+		Mockito.when(userDAO.findByEmail(email)).thenReturn(user1);
+		CityWeather cityWeather = Mockito.mock(CityWeather.class);
+		Mockito.when(cityWeather.getWeatherConditions()).thenReturn(weatherConditions);
+		Mockito.when(cityWeatherDAO.findByName(cityName)).thenReturn(cityWeather);
+		List<CityDTO> listCities = cityTemperatureService.listCities(email);
+		assertTrue(listCities.isEmpty());
+	}
 	
 	@Test
 	public void verifySelectionWeatherConditions() {
@@ -109,13 +114,33 @@ public class CityTemperatureServiceTest {
 		List<WeatherCondition> weatherConditions = new ArrayList<WeatherCondition>();
 		weatherConditions.add(weatherCondition);
 		Mockito.when(userDAO.findByEmail(email)).thenReturn(user);
-		CityWeather cityWeather = Mockito.mock(CityWeather.class);
-		Mockito.when(cityWeather.getWeatherConditions()).thenReturn(weatherConditions);
-		Mockito.when(cityWeatherDAO.findByName(cityName)).thenReturn(cityWeather);
+		CityWeather cityWeather1 = Mockito.mock(CityWeather.class);
+		Mockito.when(cityWeather1.getWeatherConditions()).thenReturn(weatherConditions);
+		Mockito.when(cityWeatherDAO.findByName(cityName)).thenReturn(cityWeather1);
 		List<CityDTO> listCities = cityTemperatureService.listCities(email);
 		assertEquals(weatherCondition, listCities.get(0).getWeatherConditions().get(0));
 	}
 
+	@Test
+	public void verifyPersistenceNewWeatherCondition() {
+		LocalDateTime now = LocalDateTime.now();
+		weatherCondition = createWeatherCondition(cityKey, 28.0, "C", LocalDateTime.now());
+		List<AvailableTimeToCity> availableTimeToCities = new ArrayList<AvailableTimeToCity>();
+		availableTimeToCities.add(AvailableTimeToCity.builder().id(1l).cityName(cityName)
+				.start(LocalDateTime.now()).end(LocalDateTime.now().plusDays(7)).build());
+		User user = Mockito.mock(User.class);
+		Mockito.when(user.getAvailableTimeToCities()).thenReturn(availableTimeToCities);
+		WeatherCondition weatherCondition = createWeatherCondition(cityKey, 28.0, "C", now);
+		Mockito.when(userDAO.findByEmail(email)).thenReturn(user);
+		CityWeather cityWeather1 = Mockito.mock(CityWeather.class);
+		Mockito.when(cityWeather1.getKey()).thenReturn(cityKey);
+		Mockito.when(cityWeatherDAO.findByName(cityName)).thenReturn(cityWeather1);
+		Mockito.when(accuweatherService.fetchWeatherConditions(cityKey)).thenReturn(weatherCondition);
+		cityTemperatureService.updateCityWeathers(email);
+		Mockito.verify(weatherConditionDAO).save(weatherCondition);
+		Mockito.verify(cityWeatherDAO).save(cityWeather1);
+	}
+	
 	@Test
 	public void verifyAddInRepository() {
 		weatherCondition = createWeatherCondition(cityKey, 28.0, "C", LocalDateTime.now());
