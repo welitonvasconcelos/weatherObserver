@@ -4,11 +4,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.stream.Collectors;
 
-import javax.persistence.EntityManager;
-
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -32,9 +28,6 @@ public class CityTemperatureService {
 	private WeatherConditionDAO weatherConditionDAO;
 
 	@Autowired
-	private ModelMapper modelMapper;
-
-	@Autowired
 	public CityTemperatureService(UserDAO userDAO, CityWeatherDAO cityWeatherDAO,
 			AccuweatherService accuweatherService, AvailableTimeToCityDAO availableTimeToCityDAO, WeatherConditionDAO weatherConditionDAO) {
 		this.userDAO = userDAO;
@@ -50,16 +43,30 @@ public class CityTemperatureService {
 			throw new NoSuchElementException("User not found");
 		List<AvailableTimeToCity> citiesAndPeriodToObserve = verifyCitiesInSlectedPeriod(user);
 		List<CityWeather> cityWeather = searchAvailableCityWeather(citiesAndPeriodToObserve);
-		List<CityDTO> cityWeatherDTO = cityWeather.stream().map(city -> modelMapper.map(city, CityDTO.class))
-				.collect(Collectors.toList());
+		List<CityDTO> cityWeatherDTO = convertCityWeatherToDTO(cityWeather);
 		return cityWeatherDTO;
 	}
+	
+	private List<CityDTO> convertCityWeatherToDTO(List<CityWeather> cityWeather) {
+		 List<CityDTO> cityWeatherDTO = new ArrayList<>();
+		for (CityWeather cityWeather2 : cityWeather) {
+			if(cityWeather2.getWeatherConditions().isEmpty())
+				continue;
+			CityDTO map = new CityDTO();
+			map.setName(cityWeather2.getName());
+			map.setWeatherConditions(cityWeather2.getWeatherConditions());
+			cityWeatherDTO.add(map);
+		}
+        return cityWeatherDTO;
+    }
 
 	private List<CityWeather>  searchAvailableCityWeather(List<AvailableTimeToCity> citiesToObserve) {
 		List<CityWeather> cityWeather = new ArrayList<>();
 		for (AvailableTimeToCity periodToCity : citiesToObserve) {
 			CityWeather city = cityWeatherDAO.findByName(periodToCity.getCityName());
 			List<WeatherCondition> weatherConditions = removeWeatherConditionsInDiffertenPeriod(city.getWeatherConditions(), periodToCity);
+			if(weatherConditions.isEmpty())
+				continue;
 			city.setWeatherConditions(weatherConditions);
 			cityWeather.add(city);
 		}
