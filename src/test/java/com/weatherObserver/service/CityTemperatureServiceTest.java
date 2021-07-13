@@ -55,6 +55,9 @@ public class CityTemperatureServiceTest {
 
 	@Captor
 	private ArgumentCaptor<CityWeather> captor;
+	
+	@Captor
+	private ArgumentCaptor<List<WeatherCondition>> captor2;
 
 	private String email;
 
@@ -117,8 +120,10 @@ public class CityTemperatureServiceTest {
 		CityWeather cityWeather1 = Mockito.mock(CityWeather.class);
 		Mockito.when(cityWeather1.getWeatherConditions()).thenReturn(weatherConditions);
 		Mockito.when(cityWeatherDAO.findByName(cityName)).thenReturn(cityWeather1);
-		List<CityDTO> listCities = cityTemperatureService.listCities(email);
-		assertEquals(weatherCondition, listCities.get(0).getWeatherConditions().get(0));
+		cityTemperatureService.listCities(email);
+		Mockito.verify(cityWeather1).setWeatherConditions(captor2.capture());
+		List<WeatherCondition> weatherConditionsFinal = captor2.getValue();
+		assertEquals(weatherCondition, weatherConditionsFinal.get(0));
 	}
 
 	@Test
