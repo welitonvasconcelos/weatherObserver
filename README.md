@@ -5,7 +5,7 @@ Weather Observer is a demo system to register the current temperature observatio
 
 ## Installation
 
-Use the package manager [gradle](https://gradle.org/install/) to install foobar.
+Use the package manager [gradle](https://gradle.org/install/) to install weatherObserver.
 
 ```bash
 gradle bootRun
